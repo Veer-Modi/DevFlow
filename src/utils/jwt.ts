@@ -12,6 +12,12 @@ export function signToken(payload: string | object | Buffer): string {
   return jwt.sign(payload, getJwtSecret(), { expiresIn: '1h' });
 }
 
-export function verifyToken(token: string) {
-  return jwt.verify(token, getJwtSecret());
+import { CustomJwtPayload } from '@/types/jwt';
+
+export function verifyToken(token: string): CustomJwtPayload {
+  const decoded = jwt.verify(token, getJwtSecret());
+  if (typeof decoded === "string") {
+    throw new Error("Invalid token format");
+  }
+  return decoded as CustomJwtPayload;
 }

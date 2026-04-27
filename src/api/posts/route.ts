@@ -5,9 +5,11 @@ import { authenticate } from '@/middleware/auth';
 import { handleModeration } from '@/utils/moderation';
 import { rateLimit } from '@/middleware/rateLimit';
 
+import { CustomJwtPayload } from '@/types/jwt';
+
 export async function POST(req: NextRequest) {
   try {
-    const user = authenticate(req);
+    const user = authenticate(req) as CustomJwtPayload | null;
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

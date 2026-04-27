@@ -7,10 +7,11 @@ import { Types } from 'mongoose';
 import { handleModeration } from '@/utils/moderation';
 import { rateLimit } from '@/middleware/rateLimit';
 import { createNotification } from '@/utils/notification';
+import { CustomJwtPayload } from '@/types/jwt';
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const user = authenticate(req);
+    const user = authenticate(req) as CustomJwtPayload | null;
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

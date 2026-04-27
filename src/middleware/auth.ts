@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/utils/jwt';
 
-export function authenticate(req: NextRequest) {
+import { CustomJwtPayload } from '@/types/jwt';
+
+export function authenticate(req: NextRequest): CustomJwtPayload | null {
     const authHeader = req.headers.get('Authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return null;
