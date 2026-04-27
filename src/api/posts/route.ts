@@ -3,12 +3,23 @@ import { connectToDatabase } from '@/lib/db';
 import Post from '@/models/Post';
 import { authenticate } from '@/middleware/auth';
 import { handleModeration } from '@/utils/moderation';
+import { rateLimit } from '@/middleware/rateLimit';
 
 export async function POST(req: NextRequest) {
   try {
     const user = authenticate(req);
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const rateLimitResult = rateLimit({
+      key: `post_reply:${user.id}`,
+      limit: 5,
+      windowMs: 60 * 1000 // 1 minute
+    });
+
+    if (!rateLimitResult.success) {
+      return NextResponse.json({ error: 'You are posting too fast. Please wait before submitting again.' }, { status: 429 });
     }
 
     await connectToDatabase();
