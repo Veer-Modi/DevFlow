@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db';
 import Post from '@/models/Post';
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     await connectToDatabase();
 
-    const postId = params.id;
+    const postId = (await params).id;
 
     const post = await Post.findByIdAndUpdate(
       postId,

@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '../../../lib/db';
-import User from '../../../models/User';
-import { comparePassword } from '../../../utils/hash';
-import { signToken } from '../../../utils/jwt';
-import { loginRateLimiter } from '../../../middleware/rateLimit';
+import { connectToDatabase } from '@/lib/db';
+import User from '@/models/User';
+import { comparePassword } from '@/utils/hash';
+import { signToken } from '@/utils/jwt';
+import { loginRateLimiter } from '@/middleware/rateLimit';
 
 export async function POST(req: Request) {
   try {

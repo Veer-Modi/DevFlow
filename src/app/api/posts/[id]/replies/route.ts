@@ -9,7 +9,7 @@ import { rateLimit } from '@/middleware/rateLimit';
 import { createNotification } from '@/utils/notification';
 import { CustomJwtPayload } from '@/types/jwt';
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = authenticate(req) as CustomJwtPayload | null;
     if (!user) {
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
     await connectToDatabase();
 
-    const postId = params.id;
+    const postId = (await params).id;
     if (!Types.ObjectId.isValid(postId)) {
       return NextResponse.json({ error: 'Invalid post ID' }, { status: 400 });
     }
@@ -76,11 +76,11 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   }
 }
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     await connectToDatabase();
 
-    const postId = params.id;
+    const postId = (await params).id;
     if (!Types.ObjectId.isValid(postId)) {
       return NextResponse.json({ error: 'Invalid post ID' }, { status: 400 });
     }

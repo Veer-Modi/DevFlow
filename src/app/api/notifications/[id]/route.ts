@@ -4,7 +4,7 @@ import Notification from '@/models/Notification';
 import { authenticate } from '@/middleware/auth';
 import { Types } from 'mongoose';
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = authenticate(req);
     if (!user) {
@@ -13,7 +13,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
     await connectToDatabase();
 
-    const notificationId = params.id;
+    const notificationId = (await params).id;
     if (!Types.ObjectId.isValid(notificationId)) {
       return NextResponse.json({ error: 'Invalid notification ID' }, { status: 400 });
     }

@@ -4,7 +4,7 @@ import { requireAdmin } from '@/middleware/auth';
 import User from '@/models/User';
 import { Types } from 'mongoose';
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const adminCheck = requireAdmin(req);
     if (!adminCheck.authorized) {
@@ -13,7 +13,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
     await connectToDatabase();
 
-    const userId = params.id;
+    const userId = (await params).id;
     if (!Types.ObjectId.isValid(userId)) {
       return NextResponse.json({ error: 'Invalid user ID' }, { status: 400 });
     }

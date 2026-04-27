@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '../../../../lib/db';
-import Reply from '../../../../models/Reply';
-import { authenticate } from '../../../../middleware/auth';
+import { connectToDatabase } from '@/lib/db';
+import Reply from '@/models/Reply';
+import { authenticate } from '@/middleware/auth';
 import { Types } from 'mongoose';
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = authenticate(req);
     if (!user) {
@@ -13,7 +13,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 
     await connectToDatabase();
 
-    const replyId = params.id;
+    const replyId = (await params).id;
     if (!Types.ObjectId.isValid(replyId)) {
       return NextResponse.json({ error: 'Invalid reply ID' }, { status: 400 });
     }

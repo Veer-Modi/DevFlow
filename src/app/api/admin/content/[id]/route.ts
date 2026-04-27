@@ -5,7 +5,7 @@ import Post from '@/models/Post';
 import Reply from '@/models/Reply';
 import { Types } from 'mongoose';
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const adminCheck = requireAdmin(req);
     if (!adminCheck.authorized) {
@@ -14,7 +14,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 
     await connectToDatabase();
 
-    const contentId = params.id;
+    const contentId = (await params).id;
     if (!Types.ObjectId.isValid(contentId)) {
       return NextResponse.json({ error: 'Invalid content ID' }, { status: 400 });
     }
