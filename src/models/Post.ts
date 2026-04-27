@@ -20,4 +20,6 @@ const PostSchema: Schema = new Schema({
   created_at: { type: Date, default: Date.now },
 });
 
+PostSchema.index({ title: 'text', description: 'text', tags: 'text' });
+
 export default mongoose.models.Post || mongoose.model<IPost>('Post', PostSchema);

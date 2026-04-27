@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '../../../lib/db';
-import Post from '../../../models/Post';
-import { authenticate } from '../../../middleware/auth';
+import { connectToDatabase } from '@/lib/db';
+import Post from '@/models/Post';
+import { authenticate } from '@/middleware/auth';
 
 export async function POST(req: NextRequest) {
   try {
