@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
-import { IReply } from '../types/reply';
+import { IReply } from '@/types/reply';
 
 const ReplySchema: Schema = new Schema({
   post_id: { type: Schema.Types.ObjectId, ref: 'Post', required: true },

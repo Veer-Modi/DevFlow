@@ -47,6 +47,10 @@ export default function Navbar() {
           <div className="flex items-center space-x-4">
             {isLoggedIn ? (
               <>
+                <Link href="/create" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium border border-gray-700 hover:bg-gray-800 transition-colors">
+                  Create Post
+                </Link>
+
                 <button className="text-gray-400 hover:text-white relative p-1 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
                   <span className="sr-only">View notifications</span>
                   <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
