@@ -7,6 +7,7 @@ interface PostCardProps {
     description: string;
     tags: string[];
     view_count: number;
+    reply_count?: number;
     created_at: string;
     user_id: {
       username: string;
@@ -42,6 +43,16 @@ export default function PostCard({ post }: PostCardProps) {
     return name ? name.charAt(0).toUpperCase() : '?';
   };
 
+  const getTagStyles = (tag: string) => {
+    const t = tag.toLowerCase();
+    if (t === 'react' || t === 'reactjs') return "bg-blue-500/10 text-blue-400 border-blue-500/20 group-hover:bg-blue-500/20";
+    if (t === 'node' || t === 'nodejs') return "bg-green-500/10 text-green-400 border-green-500/20 group-hover:bg-green-500/20";
+    if (t === 'python') return "bg-yellow-500/10 text-yellow-400 border-yellow-500/20 group-hover:bg-yellow-500/20";
+    if (t === 'css' || t === 'tailwind') return "bg-teal-500/10 text-teal-400 border-teal-500/20 group-hover:bg-teal-500/20";
+    if (t === 'nextjs' || t === 'next.js') return "bg-gray-500/10 text-gray-300 border-gray-500/20 group-hover:bg-gray-500/20";
+    return "bg-indigo-500/10 text-indigo-400 border-indigo-500/20 group-hover:bg-indigo-500/20";
+  };
+
   // Generate a pseudo-random color for the avatar based on the username
   const avatarColors = ['bg-indigo-500', 'bg-blue-500', 'bg-purple-500', 'bg-green-500', 'bg-rose-500', 'bg-amber-500'];
   const nameLen = post.user_id?.username ? post.user_id.username.length : 0;
@@ -66,7 +77,7 @@ export default function PostCard({ post }: PostCardProps) {
         
         <div className="flex flex-wrap gap-2 mb-6">
           {post.tags.map((tag, index) => (
-            <span key={index} className="px-2.5 py-1 rounded-md text-[11px] font-mono font-medium tracking-wide bg-[#1E293B] text-indigo-300 border border-indigo-500/20 group-hover:bg-indigo-500/10 group-hover:border-indigo-500/30 transition-colors duration-200">
+            <span key={index} className={`px-2.5 py-1 rounded-md text-[11px] font-mono font-medium tracking-wide border transition-colors duration-200 ${getTagStyles(tag)}`}>
               #{tag}
             </span>
           ))}
@@ -86,12 +97,15 @@ export default function PostCard({ post }: PostCardProps) {
               </span>
             </div>
           </div>
-          <div className="flex items-center space-x-1.5 text-gray-500 group-hover:text-gray-300 transition-colors bg-[#0F172A] px-2.5 py-1 rounded-full text-xs font-medium border border-[rgba(255,255,255,0.03)]">
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-            </svg>
-            <span>{post.view_count || 0}</span>
+          <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-1.5 text-gray-500 group-hover:text-gray-300 transition-colors">
+              <span className="text-sm">👁</span>
+              <span className="text-xs font-medium">{post.view_count || 0}</span>
+            </div>
+            <div className="flex items-center space-x-1.5 text-gray-500 group-hover:text-gray-300 transition-colors">
+              <span className="text-sm">💬</span>
+              <span className="text-xs font-medium">{post.reply_count || 0}</span>
+            </div>
           </div>
         </div>
       </div>

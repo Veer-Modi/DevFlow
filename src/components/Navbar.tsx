@@ -36,6 +36,14 @@ export default function Navbar() {
                 DevFlow<span className="text-[#6366F1]">.</span>
               </span>
             </Link>
+            <div className="hidden md:flex ml-10 space-x-6">
+              <Link href="/" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">
+                Feed
+              </Link>
+              <Link href="#" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">
+                Explore
+              </Link>
+            </div>
           </div>
           
           <div className="flex-1 max-w-xl mx-8 hidden sm:block">

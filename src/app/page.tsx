@@ -4,12 +4,15 @@ import { useEffect, useState } from 'react';
 import api from '@/utils/api';
 import PostCard from '@/components/PostCard';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { getToken } from '@/utils/authClient';
 
 export default function Home() {
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [sort, setSort] = useState('latest');
+  const router = useRouter();
 
   useEffect(() => {
     fetchPosts();
@@ -28,15 +31,27 @@ export default function Home() {
     }
   };
 
+  const handleCreatePost = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (getToken()) {
+      router.push('/create');
+    } else {
+      router.push('/login');
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       
       {/* Hero Section */}
-      <section className="relative w-full overflow-hidden subtle-grid py-16 sm:py-24 border-b border-[rgba(255,255,255,0.05)] bg-[#0B0F17]">
+      <section 
+        className="relative w-full overflow-hidden subtle-grid py-16 sm:py-24 border-b border-[rgba(255,255,255,0.05)] bg-[#0B0F17]"
+        style={{ background: 'radial-gradient(circle at top, rgba(99,102,241,0.1), transparent), #0B0F17' }}
+      >
         {/* Subtle background glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-indigo-500/10 blur-[120px] rounded-full pointer-events-none" />
         
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
           <h1 className="text-5xl sm:text-7xl font-extrabold tracking-tight mb-6">
             <span className="text-white">Build</span>{' '}
             <span className="hero-gradient">Together.</span>
@@ -45,10 +60,13 @@ export default function Home() {
             Ask questions, share knowledge, and solve problems with a community of world-class developers.
           </p>
           <div className="flex items-center justify-center space-x-4">
-            <Link href="/create" className="bg-[#6366F1] hover:bg-[#4F46E5] text-white px-8 py-3.5 rounded-full font-bold shadow-[0_0_20px_rgba(99,102,241,0.3)] hover:shadow-[0_0_30px_rgba(99,102,241,0.5)] transition-all duration-200">
-              Start a Discussion
-            </Link>
-            <a href="#feed" className="bg-[#111827] hover:bg-[#1E293B] text-gray-300 border border-[rgba(255,255,255,0.1)] px-8 py-3.5 rounded-full font-bold transition-all duration-200">
+            <button 
+              onClick={handleCreatePost} 
+              className="bg-indigo-500 hover:bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 active:scale-95 cursor-pointer shadow-[0_0_20px_rgba(99,102,241,0.3)] hover:shadow-[0_0_30px_rgba(99,102,241,0.5)] focus-visible:ring-2 focus-visible:ring-indigo-500/50"
+            >
+              Create a Post
+            </button>
+            <a href="#feed" className="bg-[#111827] hover:bg-[#1E293B] text-gray-300 border border-[rgba(255,255,255,0.1)] px-6 py-3 rounded-lg font-medium transition-all duration-200 active:scale-95 focus-visible:ring-2 focus-visible:ring-indigo-500/50">
               Explore Feed
             </a>
           </div>
@@ -56,7 +74,7 @@ export default function Home() {
       </section>
 
       {/* Main Feed Container */}
-      <main id="feed" className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12 scroll-mt-20">
+      <main id="feed" className="flex-1 max-w-5xl mx-auto px-4 w-full py-12 scroll-mt-20">
         
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 pb-4 border-b border-[rgba(255,255,255,0.05)] space-y-4 sm:space-y-0">
           <h2 className="text-2xl font-bold text-gray-100 flex items-center">
@@ -76,7 +94,7 @@ export default function Home() {
               id="sort"
               value={sort}
               onChange={(e) => setSort(e.target.value)}
-              className="appearance-none block w-full sm:w-auto pl-10 pr-10 py-2.5 bg-[#0F172A] border border-[rgba(255,255,255,0.1)] text-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 rounded-lg text-sm font-medium transition-colors hover:bg-[#111827] cursor-pointer"
+              className="appearance-none block w-full sm:w-auto pl-10 pr-10 py-2.5 bg-[#0F172A] border border-[rgba(255,255,255,0.1)] text-gray-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/50 rounded-lg text-sm font-medium transition-colors hover:bg-[#111827] cursor-pointer"
             >
               <option value="latest">Latest Updates</option>
               <option value="most_viewed">Most Viewed</option>
@@ -101,18 +119,10 @@ export default function Home() {
 
         {loading ? (
           <div className="space-y-6">
-            {[1, 2, 3].map((n) => (
-              <div key={n} className="bg-[#111827] rounded-xl p-6 border border-[rgba(255,255,255,0.05)] animate-pulse shadow-md">
-                <div className="flex items-center space-x-4 mb-4">
-                  <div className="h-10 w-10 bg-[#1E293B] rounded-full"></div>
-                  <div className="space-y-2">
-                    <div className="h-4 bg-[#1E293B] rounded w-32"></div>
-                    <div className="h-3 bg-[#1E293B] rounded w-24"></div>
-                  </div>
-                </div>
-                <div className="h-6 bg-[#1E293B] rounded w-3/4 mb-4"></div>
-                <div className="h-4 bg-[#1E293B] rounded w-full mb-2"></div>
-                <div className="h-4 bg-[#1E293B] rounded w-5/6"></div>
+            {[1, 2, 3, 4].map((n) => (
+              <div key={n} className="bg-[#111827] rounded-xl h-24 animate-pulse shadow-md border border-[rgba(255,255,255,0.05)] flex flex-col justify-center px-6">
+                <div className="h-5 bg-[#1E293B] rounded w-1/3 mb-3"></div>
+                <div className="h-3 bg-[#1E293B] rounded w-1/4"></div>
               </div>
             ))}
           </div>
@@ -123,16 +133,19 @@ export default function Home() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
               </svg>
             </div>
-            <h3 className="text-xl font-bold text-gray-100 mb-2">It's quiet in here...</h3>
+            <h3 className="text-xl font-bold text-gray-100 mb-2">No discussions yet</h3>
             <p className="text-gray-400 mb-8 max-w-md mx-auto">
-              Be the first to share a coding challenge, insight, or question with the community.
+              Start the first conversation and help others learn 🚀
             </p>
-            <Link href="/create" className="inline-flex items-center bg-[#6366F1] hover:bg-[#4F46E5] text-white px-6 py-3 rounded-full font-bold transition-all duration-200">
+            <button 
+              onClick={handleCreatePost} 
+              className="inline-flex items-center bg-indigo-500 hover:bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500/50"
+            >
               <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
               Create First Post
-            </Link>
+            </button>
           </div>
         ) : (
           <div className="space-y-6">
