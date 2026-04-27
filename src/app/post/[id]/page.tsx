@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { getUser } from '@/utils/authClient';
 import ReplyCard from '@/components/ReplyCard';
 import ReplyForm from '@/components/ReplyForm';
+import { toast } from 'sonner';
 
 export default function PostDetail() {
   const { id } = useParams();
@@ -54,8 +55,48 @@ export default function PostDetail() {
     }
   }, [id, fetchPost, fetchReplies]);
 
-  const handleReplyAddedOrDeleted = () => {
-    fetchReplies();
+  const handleReplySubmit = async (content: string, images: string[]) => {
+    const tempId = `temp-${Date.now()}`;
+    const optimisticReply = {
+      _id: tempId,
+      content,
+      images,
+      user_id: currentUser ? { _id: currentUser.id, username: currentUser.username, full_name: currentUser.username } : null,
+      created_at: new Date().toISOString(),
+      isOptimistic: true
+    };
+
+    // Optimistically add to UI instantly
+    setReplies(prev => [...prev, optimisticReply]);
+
+    try {
+      const res = await api.post(`/posts/${id}/replies`, { content, images });
+      // Replace optimistic reply with real reply from server
+      setReplies(prev => prev.map(r => r._id === tempId ? res.data : r));
+      toast.success('Reply added successfully!');
+    } catch (err: any) {
+      // Revert optimistic addition
+      setReplies(prev => prev.filter(r => r._id !== tempId));
+      toast.error(err.response?.data?.error || 'Failed to post reply.');
+      throw err; // Let ReplyForm know it failed
+    }
+  };
+
+  const handleReplyDelete = async (replyId: string) => {
+    const replyToDelete = replies.find(r => r._id === replyId);
+    if (!replyToDelete) return;
+
+    // Optimistically remove from UI
+    setReplies(prev => prev.filter(r => r._id !== replyId));
+
+    try {
+      await api.delete(`/replies/${replyId}`);
+      toast.success('Reply deleted');
+    } catch (err: any) {
+      // Revert optimistic deletion
+      setReplies(prev => [...prev, replyToDelete].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()));
+      toast.error(err.response?.data?.error || 'Failed to delete reply');
+    }
   };
 
   const timeSince = (dateStr: string) => {
@@ -71,17 +112,23 @@ export default function PostDetail() {
     if (interval > 1) return Math.floor(interval) + " hours ago";
     interval = seconds / 60;
     if (interval > 1) return Math.floor(interval) + " minutes ago";
-    return Math.floor(seconds) + " seconds ago";
+    return "just now";
   };
 
   if (loadingPost) {
     return (
       <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6">
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-8 animate-pulse">
-          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-6"></div>
-          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full mb-3"></div>
-          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full mb-3"></div>
-          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6"></div>
+        <div className="bg-[#111827] rounded-2xl p-8 border border-[rgba(255,255,255,0.05)] animate-pulse shadow-xl">
+          <div className="h-10 bg-[#1E293B] rounded w-3/4 mb-6"></div>
+          <div className="flex space-x-4 mb-8">
+             <div className="h-8 w-8 bg-[#1E293B] rounded-full"></div>
+             <div className="h-8 bg-[#1E293B] rounded w-32"></div>
+          </div>
+          <div className="space-y-4">
+            <div className="h-4 bg-[#1E293B] rounded w-full"></div>
+            <div className="h-4 bg-[#1E293B] rounded w-full"></div>
+            <div className="h-4 bg-[#1E293B] rounded w-5/6"></div>
+          </div>
         </div>
       </div>
     );
@@ -90,12 +137,12 @@ export default function PostDetail() {
   if (error || !post) {
     return (
       <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 text-center">
-        <div className="bg-red-50 dark:bg-red-900/50 border border-red-400 text-red-700 dark:text-red-200 px-4 py-8 rounded-lg shadow">
-          <svg className="mx-auto h-12 w-12 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-12 rounded-2xl shadow-xl">
+          <svg className="mx-auto h-12 w-12 mb-4 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <h2 className="text-lg font-medium mb-2">{error || 'Post not found'}</h2>
-          <Link href="/" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium">
+          <h2 className="text-xl font-bold mb-4">{error || 'Post not found'}</h2>
+          <Link href="/" className="inline-flex items-center text-indigo-400 hover:text-indigo-300 font-medium transition-colors">
             &larr; Back to Feed
           </Link>
         </div>
@@ -105,88 +152,90 @@ export default function PostDetail() {
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6">
-      <Link href="/" className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 mb-6 transition-colors">
+      <Link href="/" className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-300 mb-6 transition-colors">
         <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
         </svg>
         Back to feed
       </Link>
 
-      <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden mb-8">
-        <div className="p-6 sm:p-8 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex flex-wrap gap-2 mb-4">
+      <div className="bg-[#111827] shadow-xl rounded-2xl overflow-hidden mb-8 border border-[rgba(255,255,255,0.05)] relative">
+        <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-indigo-500 to-purple-500" />
+        
+        <div className="p-6 sm:p-8 border-b border-[rgba(255,255,255,0.05)]">
+          <div className="flex flex-wrap gap-2 mb-6">
             {post.tags?.map((tag: string, index: number) => (
-              <span key={index} className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                {tag}
+              <span key={index} className="px-2.5 py-1 rounded-md text-[11px] font-mono font-medium tracking-wide bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+                #{tag}
               </span>
             ))}
           </div>
 
-          <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-6">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-6 leading-tight">
             {post.title}
           </h1>
 
-          <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-8">
-            <div className="flex items-center space-x-2">
-              <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 font-bold uppercase">
+          <div className="flex items-center justify-between text-sm text-gray-400 mb-8 border-b border-[rgba(255,255,255,0.05)] pb-6">
+            <div className="flex items-center space-x-3">
+              <div className="h-10 w-10 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-300 font-bold uppercase shadow-inner border border-indigo-500/30">
                 {(post.user_id?.full_name || post.user_id?.username || 'U')[0]}
               </div>
-              <span className="font-medium text-gray-900 dark:text-gray-200">
-                {post.user_id?.full_name || post.user_id?.username || 'Unknown User'}
-              </span>
-              <span>•</span>
-              <span>{timeSince(post.created_at)}</span>
+              <div className="flex flex-col">
+                <span className="font-semibold text-gray-200">
+                  {post.user_id?.full_name || post.user_id?.username || 'Unknown User'}
+                </span>
+                <span className="text-xs text-gray-500">{timeSince(post.created_at)}</span>
+              </div>
             </div>
             
-            <div className="flex items-center space-x-1 bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full">
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-              </svg>
+            <div className="flex items-center space-x-1.5 bg-[#0F172A] px-3 py-1.5 rounded-full border border-[rgba(255,255,255,0.03)] text-gray-400">
+              <span className="text-sm">👁</span>
               <span className="font-medium">{post.view_count || 0}</span>
             </div>
           </div>
 
-          <div className="prose dark:prose-invert max-w-none text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
+          <div className="prose prose-invert max-w-none text-gray-300 whitespace-pre-wrap leading-relaxed text-base sm:text-lg">
             {post.description}
           </div>
 
           {post.images && post.images.length > 0 && (
             <div className="mt-8 grid gap-4 grid-cols-1 sm:grid-cols-2">
               {post.images.map((img: string, idx: number) => (
-                <img key={idx} src={img} alt={`Post attachment ${idx + 1}`} className="rounded-lg border border-gray-200 dark:border-gray-700 w-full object-cover" />
+                <img key={idx} src={img} alt={`Post attachment ${idx + 1}`} className="rounded-xl border border-[rgba(255,255,255,0.1)] w-full object-cover shadow-lg" />
               ))}
             </div>
           )}
         </div>
 
         {/* Replies Section */}
-        <div className="bg-gray-50 dark:bg-gray-900 p-6 sm:p-8">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
-            Replies ({replies.length})
+        <div className="bg-[#0F172A] p-6 sm:p-8 relative">
+          <h3 className="text-xl font-bold text-white mb-6 flex items-center">
+            <span className="mr-2">💬</span> 
+            Discussion ({replies.length})
           </h3>
           
           {repliesError && (
-            <div className="text-red-500 text-sm mb-4">{repliesError}</div>
+            <div className="text-red-400 text-sm mb-6 bg-red-500/10 p-3 rounded-lg border border-red-500/20">{repliesError}</div>
           )}
 
           {loadingReplies ? (
             <div className="space-y-4">
-              <div className="h-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-full"></div>
-              <div className="h-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-full"></div>
+              <div className="h-24 bg-[#111827] rounded-xl animate-pulse w-full border border-[rgba(255,255,255,0.02)]"></div>
+              <div className="h-24 bg-[#111827] rounded-xl animate-pulse w-full border border-[rgba(255,255,255,0.02)]"></div>
             </div>
           ) : replies.length === 0 ? (
-            <div className="text-center py-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm mb-6">
-              <p className="text-gray-500 dark:text-gray-400">No replies yet. Be the first to reply!</p>
+            <div className="text-center py-12 bg-[#111827] border border-[rgba(255,255,255,0.05)] rounded-xl shadow-inner mb-2">
+              <div className="text-4xl mb-4 opacity-50">💭</div>
+              <p className="text-gray-400 font-medium">No replies yet. Be the first to share your thoughts!</p>
             </div>
           ) : (
-            <div className="space-y-4 mb-8">
+            <div className="space-y-4 mb-2">
               {replies.map((reply) => (
                 <ReplyCard 
                   key={reply._id} 
                   reply={reply} 
                   currentUser={currentUser} 
-                  onDeleted={handleReplyAddedOrDeleted} 
+                  onDelete={handleReplyDelete} 
                 />
               ))}
             </div>
@@ -196,7 +245,7 @@ export default function PostDetail() {
         <ReplyForm 
           postId={id as string} 
           currentUser={currentUser} 
-          onReplyAdded={handleReplyAddedOrDeleted} 
+          onSubmit={handleReplySubmit} 
         />
       </div>
     </div>

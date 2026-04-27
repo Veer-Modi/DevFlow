@@ -1,17 +1,12 @@
 "use client";
 
-import { useState } from 'react';
-import api from '@/utils/api';
-
 interface ReplyCardProps {
   reply: any;
   currentUser: any;
-  onDeleted: () => void;
+  onDelete: (replyId: string) => void;
 }
 
-export default function ReplyCard({ reply, currentUser, onDeleted }: ReplyCardProps) {
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [error, setError] = useState('');
+export default function ReplyCard({ reply, currentUser, onDelete }: ReplyCardProps) {
 
   const timeSince = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -26,67 +21,58 @@ export default function ReplyCard({ reply, currentUser, onDeleted }: ReplyCardPr
     if (interval > 1) return Math.floor(interval) + " hours ago";
     interval = seconds / 60;
     if (interval > 1) return Math.floor(interval) + " minutes ago";
-    return Math.floor(seconds) + " seconds ago";
+    return "just now";
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!window.confirm('Are you sure you want to delete this reply?')) return;
-    
-    setIsDeleting(true);
-    setError('');
-    
-    try {
-      await api.delete(`/replies/${reply._id}`);
-      onDeleted();
-    } catch (err: any) {
-      console.error('Delete reply error:', err);
-      setError(err.response?.data?.error || 'Failed to delete reply');
-      setIsDeleting(false);
-    }
+    onDelete(reply._id);
   };
 
   const isOwner = currentUser && (currentUser.id === reply.user_id?._id || currentUser.role === 'admin');
+  
+  // Optimistic replies might have an 'optimistic' flag, we can fade them slightly
+  const isOptimistic = reply.isOptimistic;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-5 mb-4">
-      {error && (
-        <div className="text-red-500 text-sm mb-3">{error}</div>
-      )}
+    <div className={`bg-[#0B0F17] rounded-xl border border-[rgba(255,255,255,0.05)] p-5 mb-4 transition-all duration-200 ${isOptimistic ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
       
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center space-x-3">
-          <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 flex items-center justify-center font-bold text-sm uppercase">
+          <div className="h-8 w-8 rounded-full bg-indigo-500/10 text-indigo-400 flex items-center justify-center font-bold text-sm uppercase border border-indigo-500/20">
             {(reply.user_id?.full_name || reply.user_id?.username || 'U')[0]}
           </div>
           <div>
-            <div className="font-medium text-sm text-gray-900 dark:text-white">
+            <div className="font-medium text-sm text-gray-200">
               {reply.user_id?.full_name || reply.user_id?.username || 'Unknown User'}
             </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">
+            <div className="text-xs text-gray-500">
               {timeSince(reply.created_at)}
             </div>
           </div>
         </div>
 
-        {isOwner && (
+        {isOwner && !isOptimistic && (
           <button 
             onClick={handleDelete}
-            disabled={isDeleting}
-            className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-sm font-medium focus:outline-none transition-colors disabled:opacity-50"
+            className="text-gray-500 hover:text-red-400 text-sm font-medium focus:outline-none transition-colors"
+            title="Delete reply"
           >
-            {isDeleting ? 'Deleting...' : 'Delete'}
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
           </button>
         )}
       </div>
 
-      <div className="text-gray-800 dark:text-gray-200 text-sm whitespace-pre-wrap ml-11">
+      <div className="text-gray-300 text-sm whitespace-pre-wrap ml-11 leading-relaxed">
         {reply.content}
       </div>
 
       {reply.images && reply.images.length > 0 && (
         <div className="mt-4 ml-11 flex flex-wrap gap-2">
           {reply.images.map((img: string, idx: number) => (
-            <img key={idx} src={img} alt="Reply attachment" className="h-20 w-auto rounded border border-gray-200 dark:border-gray-700 object-cover" />
+            <img key={idx} src={img} alt="Reply attachment" className="h-20 w-auto rounded border border-[rgba(255,255,255,0.1)] object-cover" />
           ))}
         </div>
       )}

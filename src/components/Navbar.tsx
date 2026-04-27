@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getToken, removeToken, getUser } from '@/utils/authClient';
 import NotificationBell from './NotificationBell';
+import ThemeToggle from './ThemeToggle';
 
 export default function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -78,6 +79,8 @@ export default function Navbar() {
                   <NotificationBell />
                 </div>
 
+                <ThemeToggle />
+
                 <div className="relative">
                   <button onClick={handleLogout} className="text-sm font-medium text-gray-400 hover:text-white px-3 py-2 rounded-md hover:bg-[#0F172A] transition-colors">
                     Logout
@@ -86,6 +89,7 @@ export default function Navbar() {
               </>
             ) : (
               <>
+                <ThemeToggle />
                 <Link href="/login" className="text-gray-400 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-[#0F172A]">
                   Log in
                 </Link>

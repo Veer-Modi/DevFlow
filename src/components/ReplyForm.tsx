@@ -1,26 +1,25 @@
 "use client";
 
 import { useState } from 'react';
-import api from '@/utils/api';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
 interface ReplyFormProps {
   postId: string;
   currentUser: any;
-  onReplyAdded: () => void;
+  onSubmit: (content: string, images: string[]) => Promise<void>;
 }
 
-export default function ReplyForm({ postId, currentUser, onReplyAdded }: ReplyFormProps) {
+export default function ReplyForm({ postId, currentUser, onSubmit }: ReplyFormProps) {
   const [content, setContent] = useState('');
   const [imagesInput, setImagesInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
   if (!currentUser) {
     return (
-      <div className="bg-gray-50 dark:bg-gray-800/50 p-6 sm:p-8 border-t border-gray-200 dark:border-gray-700 text-center">
-        <p className="text-gray-600 dark:text-gray-400 mb-4">You must be logged in to reply to this post.</p>
-        <Link href="/login" className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+      <div className="bg-[#111827] p-6 sm:p-8 border-t border-[rgba(255,255,255,0.05)] text-center rounded-b-2xl">
+        <p className="text-gray-400 mb-4">You must be logged in to reply to this post.</p>
+        <Link href="/login" className="inline-flex justify-center py-2 px-6 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-500 hover:bg-indigo-600 transition-colors active:scale-95 shadow-lg hover:shadow-indigo-500/25">
           Login to reply
         </Link>
       </div>
@@ -31,41 +30,31 @@ export default function ReplyForm({ postId, currentUser, onReplyAdded }: ReplyFo
     e.preventDefault();
     if (!content.trim()) return;
 
-    setError('');
     setLoading(true);
 
     const images = imagesInput.split(',').map(img => img.trim()).filter(Boolean);
+    const currentContent = content;
+    const currentImages = images;
+
+    // Reset form instantly for UX
+    setContent('');
+    setImagesInput('');
 
     try {
-      await api.post(`/posts/${postId}/replies`, {
-        content,
-        images
-      });
-      setContent('');
-      setImagesInput('');
-      onReplyAdded();
+      await onSubmit(currentContent, currentImages);
     } catch (err: any) {
-      console.error('Submit reply error:', err);
-      if (err.response?.status === 429) {
-        setError('You are posting too fast. Please wait before submitting again.');
-      } else {
-        setError(err.response?.data?.error || 'Failed to submit reply. Please try again.');
-      }
+      // Revert form state if it failed
+      setContent(currentContent);
+      setImagesInput(currentImages.join(', '));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-6 sm:p-8 border-t border-gray-200 dark:border-gray-700">
-      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Add a Reply</h3>
+    <div className="bg-[#111827] p-6 sm:p-8 border-t border-[rgba(255,255,255,0.05)] rounded-b-2xl">
+      <h3 className="text-lg font-medium text-white mb-4">Add a Reply</h3>
       
-      {error && (
-        <div className="bg-red-50 dark:bg-red-900/50 border border-red-400 text-red-700 dark:text-red-200 px-4 py-3 rounded mb-4 text-sm">
-          {error}
-        </div>
-      )}
-
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="content" className="sr-only">Reply content</label>
@@ -75,13 +64,13 @@ export default function ReplyForm({ postId, currentUser, onReplyAdded }: ReplyFo
             rows={4}
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="block w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            className="block w-full rounded-lg border border-[rgba(255,255,255,0.1)] px-4 py-3 bg-[#0F172A] text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all duration-200"
             placeholder="Write your reply here..."
           />
         </div>
         
         <div>
-          <label htmlFor="reply_images" className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+          <label htmlFor="reply_images" className="block text-xs font-medium text-gray-400 mb-1.5">
             Image URLs (optional, comma-separated)
           </label>
           <input
@@ -89,16 +78,16 @@ export default function ReplyForm({ postId, currentUser, onReplyAdded }: ReplyFo
             id="reply_images"
             value={imagesInput}
             onChange={(e) => setImagesInput(e.target.value)}
-            className="block w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            className="block w-full rounded-lg border border-[rgba(255,255,255,0.1)] px-4 py-3 bg-[#0F172A] text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all duration-200"
             placeholder="https://example.com/img1.png"
           />
         </div>
 
-        <div className="flex justify-end">
+        <div className="flex justify-end pt-2">
           <button
             type="submit"
             disabled={loading || !content.trim()}
-            className={`inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white ${loading || !content.trim() ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors`}
+            className={`inline-flex justify-center py-2.5 px-6 border border-transparent shadow-lg text-sm font-semibold rounded-lg text-white ${loading || !content.trim() ? 'bg-indigo-500/50 cursor-not-allowed' : 'bg-indigo-500 hover:bg-indigo-600 hover:shadow-indigo-500/25 active:scale-95'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:ring-offset-[#0B0F17] transition-all duration-200`}
           >
             {loading ? 'Posting...' : 'Post Reply'}
           </button>
