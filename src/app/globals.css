@@ -1,17 +1,31 @@
 @import "tailwindcss";
 
 :root {
-  /* Future-proofing for light mode, defaulting to dark for now */
-  --bg-main: #0B0F17;
-  --bg-card: #111827;
-  --bg-elevated: #0F172A;
+  /* ChatGPT-like Neutral Palette */
+  --bg-main: #ffffff;
+  --bg-card: #f9f9f9;
+  --bg-elevated: #f0f0f0;
   
-  --text-primary: #E5E7EB;
-  --text-secondary: #9CA3AF;
+  --text-primary: #0f0f0f;
+  --text-secondary: #6b6b6b;
   
-  --accent-indigo: #6366F1;
-  --accent-indigo-hover: #4F46E5;
-  --accent-green: #22C55E;
+  --accent-teal: #10a37f;
+  --accent-teal-hover: #0e906f;
+  
+  --border-subtle: rgba(0, 0, 0, 0.05);
+  --border-medium: rgba(0, 0, 0, 0.1);
+}
+
+.dark {
+  --bg-main: #0f0f0f;
+  --bg-card: #171717;
+  --bg-elevated: #212121;
+  
+  --text-primary: #ececec;
+  --text-secondary: #8e8e8e;
+  
+  --accent-teal: #10a37f;
+  --accent-teal-hover: #1a7f64;
   
   --border-subtle: rgba(255, 255, 255, 0.05);
   --border-medium: rgba(255, 255, 255, 0.1);
@@ -38,7 +52,7 @@ body {
 
 /* Premium utility classes */
 .hero-gradient {
-  background: linear-gradient(135deg, var(--accent-indigo) 0%, #A855F7 100%);
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-teal) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -62,5 +76,5 @@ button, a, input, select, textarea {
 /* Focus rings for accessibility */
 *:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5);
+  box-shadow: 0 0 0 2px rgba(16, 163, 127, 0.5);
 }

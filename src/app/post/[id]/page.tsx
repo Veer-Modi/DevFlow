@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import api from '@/utils/api';
 import Link from 'next/link';
-import { getUser } from '@/utils/authClient';
+import { useAuth } from '@/context/AuthContext';
 import ReplyCard from '@/components/ReplyCard';
 import ReplyForm from '@/components/ReplyForm';
 import { toast } from 'sonner';
@@ -20,7 +20,7 @@ export default function PostDetail() {
   const [error, setError] = useState('');
   const [repliesError, setRepliesError] = useState('');
 
-  const currentUser = getUser();
+  const { user: currentUser } = useAuth();
 
   const fetchPost = useCallback(async () => {
     try {
@@ -118,16 +118,16 @@ export default function PostDetail() {
   if (loadingPost) {
     return (
       <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6">
-        <div className="bg-[#111827] rounded-2xl p-8 border border-[rgba(255,255,255,0.05)] animate-pulse shadow-xl">
-          <div className="h-10 bg-[#1E293B] rounded w-3/4 mb-6"></div>
+        <div className="bg-white dark:bg-[#171717] rounded-2xl p-8 border border-gray-200 dark:border-[rgba(255,255,255,0.05)] animate-pulse shadow-sm">
+          <div className="h-10 bg-gray-200 dark:bg-[#212121] rounded w-3/4 mb-6"></div>
           <div className="flex space-x-4 mb-8">
-             <div className="h-8 w-8 bg-[#1E293B] rounded-full"></div>
-             <div className="h-8 bg-[#1E293B] rounded w-32"></div>
+             <div className="h-8 w-8 bg-gray-200 dark:bg-[#212121] rounded-full"></div>
+             <div className="h-8 bg-gray-200 dark:bg-[#212121] rounded w-32"></div>
           </div>
           <div className="space-y-4">
-            <div className="h-4 bg-[#1E293B] rounded w-full"></div>
-            <div className="h-4 bg-[#1E293B] rounded w-full"></div>
-            <div className="h-4 bg-[#1E293B] rounded w-5/6"></div>
+            <div className="h-4 bg-gray-200 dark:bg-[#212121] rounded w-full"></div>
+            <div className="h-4 bg-gray-200 dark:bg-[#212121] rounded w-full"></div>
+            <div className="h-4 bg-gray-200 dark:bg-[#212121] rounded w-5/6"></div>
           </div>
         </div>
       </div>
@@ -137,12 +137,12 @@ export default function PostDetail() {
   if (error || !post) {
     return (
       <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 text-center">
-        <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-12 rounded-2xl shadow-xl">
+        <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 text-red-600 dark:text-red-400 px-4 py-12 rounded-2xl shadow-sm">
           <svg className="mx-auto h-12 w-12 mb-4 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <h2 className="text-xl font-bold mb-4">{error || 'Post not found'}</h2>
-          <Link href="/" className="inline-flex items-center text-indigo-400 hover:text-indigo-300 font-medium transition-colors">
+          <Link href="/" className="inline-flex items-center text-[#10a37f] hover:text-[#0e906f] font-medium transition-colors">
             &larr; Back to Feed
           </Link>
         </div>
@@ -152,81 +152,81 @@ export default function PostDetail() {
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6">
-      <Link href="/" className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-300 mb-6 transition-colors">
+      <Link href="/" className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-900 dark:hover:text-gray-300 mb-6 transition-colors">
         <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
         </svg>
         Back to feed
       </Link>
 
-      <div className="bg-[#111827] shadow-xl rounded-2xl overflow-hidden mb-8 border border-[rgba(255,255,255,0.05)] relative">
-        <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-indigo-500 to-purple-500" />
+      <div className="bg-white dark:bg-[#171717] shadow-sm rounded-2xl overflow-hidden mb-8 border border-gray-200 dark:border-[rgba(255,255,255,0.05)] relative">
+        <div className="absolute top-0 left-0 w-full h-[2px] bg-[#10a37f]" />
         
-        <div className="p-6 sm:p-8 border-b border-[rgba(255,255,255,0.05)]">
+        <div className="p-6 sm:p-8 border-b border-gray-200 dark:border-[rgba(255,255,255,0.05)]">
           <div className="flex flex-wrap gap-2 mb-6">
             {post.tags?.map((tag: string, index: number) => (
-              <span key={index} className="px-2.5 py-1 rounded-md text-[11px] font-mono font-medium tracking-wide bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+              <span key={index} className="px-2.5 py-1 rounded-md text-[11px] font-mono font-medium tracking-wide bg-gray-100 dark:bg-[#212121] text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-[rgba(255,255,255,0.05)]">
                 #{tag}
               </span>
             ))}
           </div>
 
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-6 leading-tight">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white mb-6 leading-tight">
             {post.title}
           </h1>
 
-          <div className="flex items-center justify-between text-sm text-gray-400 mb-8 border-b border-[rgba(255,255,255,0.05)] pb-6">
+          <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-8 border-b border-gray-200 dark:border-[rgba(255,255,255,0.05)] pb-6">
             <div className="flex items-center space-x-3">
-              <div className="h-10 w-10 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-300 font-bold uppercase shadow-inner border border-indigo-500/30">
+              <div className="h-10 w-10 rounded-full bg-[#10a37f]/10 flex items-center justify-center text-[#10a37f] font-bold uppercase shadow-inner border border-[#10a37f]/20">
                 {(post.user_id?.full_name || post.user_id?.username || 'U')[0]}
               </div>
               <div className="flex flex-col">
-                <span className="font-semibold text-gray-200">
+                <span className="font-semibold text-gray-900 dark:text-gray-200">
                   {post.user_id?.full_name || post.user_id?.username || 'Unknown User'}
                 </span>
                 <span className="text-xs text-gray-500">{timeSince(post.created_at)}</span>
               </div>
             </div>
             
-            <div className="flex items-center space-x-1.5 bg-[#0F172A] px-3 py-1.5 rounded-full border border-[rgba(255,255,255,0.03)] text-gray-400">
+            <div className="flex items-center space-x-1.5 bg-gray-50 dark:bg-[#212121] px-3 py-1.5 rounded-full border border-gray-200 dark:border-[rgba(255,255,255,0.03)] text-gray-600 dark:text-gray-400">
               <span className="text-sm">👁</span>
               <span className="font-medium">{post.view_count || 0}</span>
             </div>
           </div>
 
-          <div className="prose prose-invert max-w-none text-gray-300 whitespace-pre-wrap leading-relaxed text-base sm:text-lg">
+          <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
             {post.description}
           </div>
 
           {post.images && post.images.length > 0 && (
             <div className="mt-8 grid gap-4 grid-cols-1 sm:grid-cols-2">
               {post.images.map((img: string, idx: number) => (
-                <img key={idx} src={img} alt={`Post attachment ${idx + 1}`} className="rounded-xl border border-[rgba(255,255,255,0.1)] w-full object-cover shadow-lg" />
+                <img key={idx} src={img} alt={`Post attachment ${idx + 1}`} className="rounded-xl border border-gray-200 dark:border-[rgba(255,255,255,0.1)] w-full object-cover shadow-sm" />
               ))}
             </div>
           )}
         </div>
 
         {/* Replies Section */}
-        <div className="bg-[#0F172A] p-6 sm:p-8 relative">
-          <h3 className="text-xl font-bold text-white mb-6 flex items-center">
+        <div className="bg-gray-50 dark:bg-[#121212] p-6 sm:p-8 relative">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
             <span className="mr-2">💬</span> 
             Discussion ({replies.length})
           </h3>
           
           {repliesError && (
-            <div className="text-red-400 text-sm mb-6 bg-red-500/10 p-3 rounded-lg border border-red-500/20">{repliesError}</div>
+            <div className="text-red-600 dark:text-red-400 text-sm mb-6 bg-red-50 dark:bg-red-500/10 p-3 rounded-lg border border-red-200 dark:border-red-500/20">{repliesError}</div>
           )}
 
           {loadingReplies ? (
             <div className="space-y-4">
-              <div className="h-24 bg-[#111827] rounded-xl animate-pulse w-full border border-[rgba(255,255,255,0.02)]"></div>
-              <div className="h-24 bg-[#111827] rounded-xl animate-pulse w-full border border-[rgba(255,255,255,0.02)]"></div>
+              <div className="h-24 bg-white dark:bg-[#171717] rounded-xl animate-pulse w-full border border-gray-200 dark:border-[rgba(255,255,255,0.02)]"></div>
+              <div className="h-24 bg-white dark:bg-[#171717] rounded-xl animate-pulse w-full border border-gray-200 dark:border-[rgba(255,255,255,0.02)]"></div>
             </div>
           ) : replies.length === 0 ? (
-            <div className="text-center py-12 bg-[#111827] border border-[rgba(255,255,255,0.05)] rounded-xl shadow-inner mb-2">
+            <div className="text-center py-12 bg-white dark:bg-[#171717] border border-gray-200 dark:border-[rgba(255,255,255,0.05)] rounded-xl shadow-sm mb-2">
               <div className="text-4xl mb-4 opacity-50">💭</div>
-              <p className="text-gray-400 font-medium">No replies yet. Be the first to share your thoughts!</p>
+              <p className="text-gray-500 dark:text-gray-400 font-medium">No replies yet. Be the first to share your thoughts!</p>
             </div>
           ) : (
             <div className="space-y-4 mb-2">

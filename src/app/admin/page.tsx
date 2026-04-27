@@ -3,24 +3,26 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
-import { getUser } from '@/utils/authClient';
+import { useAuth } from '@/context/AuthContext';
 import StatsCard from '@/components/admin/StatsCard';
 import Link from 'next/link';
 
 export default function AdminDashboard() {
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const user = getUser();
-    if (!user || user.role !== 'admin') {
-      router.push('/');
-      return;
+    if (!authLoading) {
+      if (!user || user.role !== 'admin') {
+        router.push('/');
+        return;
+      }
+      fetchStats();
     }
-    fetchStats();
-  }, [router]);
+  }, [user, authLoading, router]);
 
   const fetchStats = async () => {
     try {

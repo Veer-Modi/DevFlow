@@ -6,11 +6,11 @@ interface StatsCardProps {
 
 export default function StatsCard({ title, value, icon }: StatsCardProps) {
   return (
-    <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
+    <div className="bg-white dark:bg-[#171717] overflow-hidden shadow-sm rounded-lg border border-gray-200 dark:border-[rgba(255,255,255,0.05)]">
       <div className="p-5">
         <div className="flex items-center">
           {icon && (
-            <div className="flex-shrink-0 bg-blue-100 dark:bg-blue-900 rounded-md p-3 mr-4 text-blue-600 dark:text-blue-300">
+            <div className="flex-shrink-0 bg-[#10a37f]/10 dark:bg-[#10a37f]/20 rounded-md p-3 mr-4 text-[#10a37f] dark:text-[#10a37f]">
               {icon}
             </div>
           )}

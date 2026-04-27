@@ -17,9 +17,9 @@ export default function ReplyForm({ postId, currentUser, onSubmit }: ReplyFormPr
 
   if (!currentUser) {
     return (
-      <div className="bg-[#111827] p-6 sm:p-8 border-t border-[rgba(255,255,255,0.05)] text-center rounded-b-2xl">
-        <p className="text-gray-400 mb-4">You must be logged in to reply to this post.</p>
-        <Link href="/login" className="inline-flex justify-center py-2 px-6 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-500 hover:bg-indigo-600 transition-colors active:scale-95 shadow-lg hover:shadow-indigo-500/25">
+      <div className="bg-gray-50 dark:bg-[#171717] p-6 sm:p-8 border-t border-gray-200 dark:border-[rgba(255,255,255,0.05)] text-center rounded-b-2xl">
+        <p className="text-gray-500 dark:text-gray-400 mb-4">You must be logged in to reply to this post.</p>
+        <Link href="/login" className="inline-flex justify-center py-2 px-6 border border-transparent text-sm font-medium rounded-lg text-white bg-[#10a37f] hover:bg-[#0e906f] transition-colors active:scale-95 shadow-sm">
           Login to reply
         </Link>
       </div>
@@ -52,8 +52,8 @@ export default function ReplyForm({ postId, currentUser, onSubmit }: ReplyFormPr
   };
 
   return (
-    <div className="bg-[#111827] p-6 sm:p-8 border-t border-[rgba(255,255,255,0.05)] rounded-b-2xl">
-      <h3 className="text-lg font-medium text-white mb-4">Add a Reply</h3>
+    <div className="bg-white dark:bg-[#171717] p-6 sm:p-8 border-t border-gray-200 dark:border-[rgba(255,255,255,0.05)] rounded-b-2xl">
+      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Add a Reply</h3>
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -64,13 +64,13 @@ export default function ReplyForm({ postId, currentUser, onSubmit }: ReplyFormPr
             rows={4}
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="block w-full rounded-lg border border-[rgba(255,255,255,0.1)] px-4 py-3 bg-[#0F172A] text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all duration-200"
+            className="block w-full rounded-lg border border-gray-300 dark:border-[rgba(255,255,255,0.1)] px-4 py-3 bg-gray-50 dark:bg-[#212121] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#10a37f]/50 focus:border-[#10a37f] transition-all duration-200"
             placeholder="Write your reply here..."
           />
         </div>
         
         <div>
-          <label htmlFor="reply_images" className="block text-xs font-medium text-gray-400 mb-1.5">
+          <label htmlFor="reply_images" className="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1.5">
             Image URLs (optional, comma-separated)
           </label>
           <input
@@ -78,7 +78,7 @@ export default function ReplyForm({ postId, currentUser, onSubmit }: ReplyFormPr
             id="reply_images"
             value={imagesInput}
             onChange={(e) => setImagesInput(e.target.value)}
-            className="block w-full rounded-lg border border-[rgba(255,255,255,0.1)] px-4 py-3 bg-[#0F172A] text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all duration-200"
+            className="block w-full rounded-lg border border-gray-300 dark:border-[rgba(255,255,255,0.1)] px-4 py-3 bg-gray-50 dark:bg-[#212121] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#10a37f]/50 focus:border-[#10a37f] transition-all duration-200"
             placeholder="https://example.com/img1.png"
           />
         </div>
@@ -87,7 +87,7 @@ export default function ReplyForm({ postId, currentUser, onSubmit }: ReplyFormPr
           <button
             type="submit"
             disabled={loading || !content.trim()}
-            className={`inline-flex justify-center py-2.5 px-6 border border-transparent shadow-lg text-sm font-semibold rounded-lg text-white ${loading || !content.trim() ? 'bg-indigo-500/50 cursor-not-allowed' : 'bg-indigo-500 hover:bg-indigo-600 hover:shadow-indigo-500/25 active:scale-95'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:ring-offset-[#0B0F17] transition-all duration-200`}
+            className={`inline-flex justify-center py-2.5 px-6 border border-transparent shadow-sm text-sm font-semibold rounded-lg text-white ${loading || !content.trim() ? 'bg-[#10a37f]/50 cursor-not-allowed' : 'bg-[#10a37f] hover:bg-[#0e906f] active:scale-95'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#10a37f] focus:ring-offset-white dark:focus:ring-offset-[#171717] transition-all duration-200`}
           >
             {loading ? 'Posting...' : 'Post Reply'}
           </button>

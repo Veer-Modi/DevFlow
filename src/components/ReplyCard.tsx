@@ -35,15 +35,15 @@ export default function ReplyCard({ reply, currentUser, onDelete }: ReplyCardPro
   const isOptimistic = reply.isOptimistic;
 
   return (
-    <div className={`bg-[#0B0F17] rounded-xl border border-[rgba(255,255,255,0.05)] p-5 mb-4 transition-all duration-200 ${isOptimistic ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+    <div className={`bg-white dark:bg-[#171717] rounded-xl border border-gray-200 dark:border-[rgba(255,255,255,0.05)] p-5 mb-4 transition-all duration-200 shadow-sm ${isOptimistic ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
       
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center space-x-3">
-          <div className="h-8 w-8 rounded-full bg-indigo-500/10 text-indigo-400 flex items-center justify-center font-bold text-sm uppercase border border-indigo-500/20">
+          <div className="h-8 w-8 rounded-full bg-[#10a37f]/10 text-[#10a37f] flex items-center justify-center font-bold text-sm uppercase border border-[#10a37f]/20">
             {(reply.user_id?.full_name || reply.user_id?.username || 'U')[0]}
           </div>
           <div>
-            <div className="font-medium text-sm text-gray-200">
+            <div className="font-medium text-sm text-gray-900 dark:text-gray-200">
               {reply.user_id?.full_name || reply.user_id?.username || 'Unknown User'}
             </div>
             <div className="text-xs text-gray-500">
@@ -55,7 +55,7 @@ export default function ReplyCard({ reply, currentUser, onDelete }: ReplyCardPro
         {isOwner && !isOptimistic && (
           <button 
             onClick={handleDelete}
-            className="text-gray-500 hover:text-red-400 text-sm font-medium focus:outline-none transition-colors"
+            className="text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 text-sm font-medium focus:outline-none transition-colors"
             title="Delete reply"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -65,14 +65,14 @@ export default function ReplyCard({ reply, currentUser, onDelete }: ReplyCardPro
         )}
       </div>
 
-      <div className="text-gray-300 text-sm whitespace-pre-wrap ml-11 leading-relaxed">
+      <div className="text-gray-700 dark:text-gray-300 text-sm whitespace-pre-wrap ml-11 leading-relaxed">
         {reply.content}
       </div>
 
       {reply.images && reply.images.length > 0 && (
         <div className="mt-4 ml-11 flex flex-wrap gap-2">
           {reply.images.map((img: string, idx: number) => (
-            <img key={idx} src={img} alt="Reply attachment" className="h-20 w-auto rounded border border-[rgba(255,255,255,0.1)] object-cover" />
+            <img key={idx} src={img} alt="Reply attachment" className="h-20 w-auto rounded border border-gray-200 dark:border-[rgba(255,255,255,0.1)] object-cover" />
           ))}
         </div>
       )}
