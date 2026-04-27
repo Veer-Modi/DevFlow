@@ -6,6 +6,7 @@ import { authenticate } from '@/middleware/auth';
 import { Types } from 'mongoose';
 import { handleModeration } from '@/utils/moderation';
 import { rateLimit } from '@/middleware/rateLimit';
+import { createNotification } from '@/utils/notification';
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -58,6 +59,14 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     }
 
     await newReply.save();
+
+    if (post.user_id.toString() !== user.id) {
+      await createNotification(
+        post.user_id.toString(),
+        "Someone replied to your post",
+        "reply"
+      );
+    }
 
     return NextResponse.json(newReply, { status: 201 });
   } catch (error: any) {

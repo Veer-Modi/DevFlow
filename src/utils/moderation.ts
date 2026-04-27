@@ -2,6 +2,7 @@ import { analyzeContent } from '@/lib/ai';
 import AbuseLog from '@/models/AbuseLog';
 import User from '@/models/User';
 import { connectToDatabase } from '@/lib/db';
+import { createNotification } from '@/utils/notification';
 
 export async function handleModeration(
   userId: string,
@@ -33,6 +34,14 @@ export async function handleModeration(
           user.status = 'blocked';
         }
         await user.save();
+
+        if (user.abuse_count === 1) {
+          await createNotification(userId, "Your content was flagged for inappropriate behavior", "warning");
+        } else if (user.abuse_count === 2) {
+          await createNotification(userId, "Warning: repeated violations may lead to account suspension", "warning");
+        } else if (user.abuse_count === 3) {
+          await createNotification(userId, "Your account has been blocked due to repeated violations", "blocked");
+        }
       }
     }
 
