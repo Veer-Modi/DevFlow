@@ -1,23 +1,27 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import api from '@/utils/api';
 import Link from 'next/link';
+import { getUser } from '@/utils/authClient';
+import ReplyCard from '@/components/ReplyCard';
+import ReplyForm from '@/components/ReplyForm';
 
 export default function PostDetail() {
   const { id } = useParams();
   const [post, setPost] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [replies, setReplies] = useState<any[]>([]);
+  
+  const [loadingPost, setLoadingPost] = useState(true);
+  const [loadingReplies, setLoadingReplies] = useState(true);
+  
   const [error, setError] = useState('');
+  const [repliesError, setRepliesError] = useState('');
 
-  useEffect(() => {
-    if (id) {
-      fetchPost();
-    }
-  }, [id]);
+  const currentUser = getUser();
 
-  const fetchPost = async () => {
+  const fetchPost = useCallback(async () => {
     try {
       const res = await api.get(`/posts/${id}`);
       setPost(res.data);
@@ -25,8 +29,33 @@ export default function PostDetail() {
       console.error('Fetch post error:', err);
       setError(err.response?.data?.error || 'Failed to load post.');
     } finally {
-      setLoading(false);
+      setLoadingPost(false);
     }
+  }, [id]);
+
+  const fetchReplies = useCallback(async () => {
+    setLoadingReplies(true);
+    setRepliesError('');
+    try {
+      const res = await api.get(`/posts/${id}/replies`);
+      setReplies(res.data || []);
+    } catch (err: any) {
+      console.error('Fetch replies error:', err);
+      setRepliesError('Failed to load replies.');
+    } finally {
+      setLoadingReplies(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    if (id) {
+      fetchPost();
+      fetchReplies();
+    }
+  }, [id, fetchPost, fetchReplies]);
+
+  const handleReplyAddedOrDeleted = () => {
+    fetchReplies();
   };
 
   const timeSince = (dateStr: string) => {
@@ -45,7 +74,7 @@ export default function PostDetail() {
     return Math.floor(seconds) + " seconds ago";
   };
 
-  if (loading) {
+  if (loadingPost) {
     return (
       <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6">
         <div className="bg-white dark:bg-gray-800 rounded-lg p-8 animate-pulse">
@@ -76,14 +105,14 @@ export default function PostDetail() {
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6">
-      <Link href="/" className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 mb-6">
+      <Link href="/" className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 mb-6 transition-colors">
         <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
         </svg>
         Back to feed
       </Link>
 
-      <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden mb-8">
         <div className="p-6 sm:p-8 border-b border-gray-200 dark:border-gray-700">
           <div className="flex flex-wrap gap-2 mb-4">
             {post.tags?.map((tag: string, index: number) => (
@@ -131,16 +160,44 @@ export default function PostDetail() {
           )}
         </div>
 
-        {/* Replies Placeholder */}
-        <div className="bg-gray-50 dark:bg-gray-800/50 p-6 sm:p-8">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Replies</h3>
-          <div className="text-center py-10 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg">
-            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-            </svg>
-            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Replies will appear here in the next phase.</p>
-          </div>
+        {/* Replies Section */}
+        <div className="bg-gray-50 dark:bg-gray-900 p-6 sm:p-8">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
+            Replies ({replies.length})
+          </h3>
+          
+          {repliesError && (
+            <div className="text-red-500 text-sm mb-4">{repliesError}</div>
+          )}
+
+          {loadingReplies ? (
+            <div className="space-y-4">
+              <div className="h-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-full"></div>
+              <div className="h-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-full"></div>
+            </div>
+          ) : replies.length === 0 ? (
+            <div className="text-center py-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm mb-6">
+              <p className="text-gray-500 dark:text-gray-400">No replies yet. Be the first to reply!</p>
+            </div>
+          ) : (
+            <div className="space-y-4 mb-8">
+              {replies.map((reply) => (
+                <ReplyCard 
+                  key={reply._id} 
+                  reply={reply} 
+                  currentUser={currentUser} 
+                  onDeleted={handleReplyAddedOrDeleted} 
+                />
+              ))}
+            </div>
+          )}
         </div>
+        
+        <ReplyForm 
+          postId={id as string} 
+          currentUser={currentUser} 
+          onReplyAdded={handleReplyAddedOrDeleted} 
+        />
       </div>
     </div>
   );
