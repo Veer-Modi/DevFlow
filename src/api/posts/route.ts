@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db';
 import Post from '@/models/Post';
 import { authenticate } from '@/middleware/auth';
+import { handleModeration } from '@/utils/moderation';
 
 export async function POST(req: NextRequest) {
   try {
@@ -34,6 +35,13 @@ export async function POST(req: NextRequest) {
       tags,
       images: Array.isArray(images) ? images : [],
     });
+
+    const moderation = await handleModeration(user.id, `${title}\n${description}`, 'post', newPost._id.toString());
+    
+    if (moderation.is_abusive) {
+      newPost.is_flagged = true;
+      newPost.flag_reason = moderation.reason;
+    }
 
     await newPost.save();
 

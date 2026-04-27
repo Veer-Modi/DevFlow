@@ -4,6 +4,7 @@ import Reply from '@/models/Reply';
 import Post from '@/models/Post';
 import { authenticate } from '@/middleware/auth';
 import { Types } from 'mongoose';
+import { handleModeration } from '@/utils/moderation';
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -37,6 +38,13 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       content,
       images: Array.isArray(images) ? images : [],
     });
+
+    const moderation = await handleModeration(user.id, content, 'reply', newReply._id.toString());
+
+    if (moderation.is_abusive) {
+      newReply.is_flagged = true;
+      newReply.flag_reason = moderation.reason;
+    }
 
     await newReply.save();
 
