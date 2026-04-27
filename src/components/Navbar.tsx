@@ -3,15 +3,21 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { getToken, removeToken } from '@/utils/authClient';
+import { getToken, removeToken, getUser } from '@/utils/authClient';
 import NotificationBell from './NotificationBell';
 
 export default function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    setIsLoggedIn(!!getToken());
+    const token = getToken();
+    setIsLoggedIn(!!token);
+    if (token) {
+      const user = getUser();
+      setIsAdmin(user?.role === 'admin');
+    }
   }, []);
 
   const handleLogout = () => {
@@ -48,6 +54,12 @@ export default function Navbar() {
           <div className="flex items-center space-x-4">
             {isLoggedIn ? (
               <>
+                {isAdmin && (
+                  <Link href="/admin" className="text-red-400 hover:text-red-300 px-3 py-2 rounded-md text-sm font-medium border border-red-900 hover:bg-red-900/30 transition-colors">
+                    Admin
+                  </Link>
+                )}
+
                 <Link href="/create" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium border border-gray-700 hover:bg-gray-800 transition-colors">
                   Create Post
                 </Link>
