@@ -15,3 +15,14 @@ export function authenticate(req: NextRequest) {
     return null;
   }
 }
+
+export function requireAdmin(req: NextRequest) {
+  const user = authenticate(req);
+  if (!user) {
+    return { authorized: false, status: 401, error: 'Unauthorized', user: null };
+  }
+  if (user.role !== 'admin') {
+    return { authorized: false, status: 403, error: 'Forbidden. Admin access required.', user };
+  }
+  return { authorized: true, user };
+}
