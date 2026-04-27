@@ -6,7 +6,7 @@ import api from '@/utils/api';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
-import { PenSquare, Image as ImageIcon, Hash, FileText, ArrowLeft } from 'lucide-react';
+import { PenSquare, Image as ImageIcon, Hash, FileText, ArrowLeft, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
 
 export default function CreatePost() {

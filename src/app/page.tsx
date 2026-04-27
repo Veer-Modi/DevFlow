@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { motion } from 'framer-motion';
-import { Sparkles, MessageSquare, TrendingUp, Compass, Plus, ArrowRight } from 'lucide-react';
+import { Sparkles, MessageSquare, TrendingUp, Compass, Plus, ArrowRight, Flame } from 'lucide-react';
 
 export default function Home() {
   const [posts, setPosts] = useState<any[]>([]);
@@ -53,7 +53,7 @@ export default function Home() {
     }
   };
 
-  const itemVariants = {
+  const itemVariants: any = {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
   };
